@@ -193,6 +193,7 @@ class FocusAttachment {
     assert(_focusDebug(() => 'Detaching node:', () => <Object>[_node, 'With enclosing scope ${_node.enclosingScope}']));
     if (isAttached) {
       if (_node.hasPrimaryFocus || (_node._manager != null && _node._manager!._markedForFocus == _node)) {
+        print('focus_manager.dart:196');
         _node.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
       // This node is no longer in the tree, so shouldn't send notifications anymore.
@@ -518,6 +519,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // unfocusable, previously-focused children.
       _canRequestFocus = value;
       if (hasFocus && !value) {
+        print("focus_manager.dart:522");
         unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
       }
       _manager?._markPropertiesChanged(this);
@@ -562,6 +564,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     // and focus any of the children here again if it is false.
     _descendantsAreFocusable = value;
     if (!value && hasFocus) {
+      print("focus_manager.dart:567");
       unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
     }
     _manager?._markPropertiesChanged(this);

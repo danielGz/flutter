@@ -185,6 +185,7 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
           if (notification.dragDetails != null && focusScope.hasFocus) {
+            print('two_dimensional_scroll_view.dart:188');
             focusScope.unfocus();
           }
           return false;

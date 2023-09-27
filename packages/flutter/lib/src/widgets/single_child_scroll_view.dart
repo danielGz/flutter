@@ -262,6 +262,7 @@ class SingleChildScrollView extends StatelessWidget {
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusNode = FocusScope.of(context);
           if (notification.dragDetails != null && focusNode.hasFocus) {
+            print('single_child_scroll_view.dart.dart:265');
             focusNode.unfocus();
           }
           return false;

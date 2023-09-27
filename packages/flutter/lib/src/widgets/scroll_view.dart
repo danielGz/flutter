@@ -485,6 +485,7 @@ abstract class ScrollView extends StatelessWidget {
         onNotification: (ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
           if (notification.dragDetails != null && focusScope.hasFocus) {
+            print('scroll_view.dart.dart:488');
             focusScope.unfocus();
           }
           return false;

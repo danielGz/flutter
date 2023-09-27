@@ -3052,6 +3052,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           case TextInputAction.none:
           case TextInputAction.unspecified:
           case TextInputAction.done:
+            break;
           case TextInputAction.go:
           case TextInputAction.search:
           case TextInputAction.send:
@@ -3060,6 +3061,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           case TextInputAction.route:
           case TextInputAction.emergencyCall:
           case TextInputAction.newline:
+          print('editable_text.dart:3063 -> ${action}');
             widget.focusNode.unfocus();
           case TextInputAction.next:
             widget.focusNode.nextFocus();
@@ -3325,6 +3327,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (kIsWeb) {
         _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
       } else {
+        print('editable_text.dart:3329');
         widget.focusNode.unfocus();
       }
     }
@@ -4516,6 +4519,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
+    print("txt_fld_click_outside");
     /// The focus dropping behavior is only present on desktop platforms
     /// and mobile browsers.
     switch (defaultTargetPlatform) {
@@ -4527,20 +4531,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         switch (event.kind) {
           case ui.PointerDeviceKind.touch:
             if (kIsWeb) {
-              widget.focusNode.unfocus();
+              //widget.focusNode.unfocus();
             }
           case ui.PointerDeviceKind.mouse:
           case ui.PointerDeviceKind.stylus:
           case ui.PointerDeviceKind.invertedStylus:
           case ui.PointerDeviceKind.unknown:
-            widget.focusNode.unfocus();
+            //widget.focusNode.unfocus();
           case ui.PointerDeviceKind.trackpad:
             throw UnimplementedError('Unexpected pointer down event for trackpad');
         }
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        widget.focusNode.unfocus();
+        // widget.focusNode.unfocus();
     }
   }
 

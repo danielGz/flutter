@@ -473,6 +473,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     if (forward && focusedChild == sortedNodes.last) {
       switch (nearestScope.traversalEdgeBehavior) {
         case TraversalEdgeBehavior.leaveFlutterView:
+          print('focus_traversal.dart:476');
           focusedChild!.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:
@@ -483,6 +484,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     if (!forward && focusedChild == sortedNodes.first) {
       switch (nearestScope.traversalEdgeBehavior) {
         case TraversalEdgeBehavior.leaveFlutterView:
+          print("focus_traversal.dart:487");
           focusedChild!.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:

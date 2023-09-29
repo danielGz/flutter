@@ -310,6 +310,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.persistKeyboardOnTapOutside = false,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -334,6 +335,9 @@ class TextField extends StatefulWidget {
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
+
+  /// Determines if the keyboard remains visible when tapping outside of it. It defaults to false.
+  final bool persistKeyboardOnTapOutside;
 
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
   ///
@@ -1414,6 +1418,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          persistKeyboardOnTapOutside: widget.persistKeyboardOnTapOutside,
         ),
       ),
     );

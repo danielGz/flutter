@@ -334,6 +334,16 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   bool _isSelectionWithinComposingRange(TextSelection selection) {
     return selection.start >= value.composing.start && selection.end <= value.composing.end;
   }
+
+  void closeInputConnection(){
+    _closeConnectionCallback.forEach((element) {element.call();});
+  }
+
+  Set<VoidCallback>_closeConnectionCallback = {};
+
+  void addCloseInputConnectionCallback(VoidCallback callback){
+    _closeConnectionCallback.add(callback);
+  }
 }
 
 /// Toolbar configuration for [EditableText].
@@ -738,6 +748,7 @@ class EditableText extends StatefulWidget {
     super.key,
     required this.controller,
     required this.focusNode,
+    this.persistKeyboardOnTapOutside = false,
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
@@ -862,6 +873,9 @@ class EditableText extends StatefulWidget {
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly;
+
+  /// Determines if the keyboard remains visible when tapping outside of it.
+  final bool persistKeyboardOnTapOutside;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2622,6 +2636,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(_onEditableScroll);
+    widget.controller.addCloseInputConnectionCallback(closeInputConnectionAndUnfocus);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
   }
@@ -3047,12 +3062,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // onEditingComplete callback: Finalize editing and remove focus, or move
       // it to the next/previous field, depending on the action.
       widget.controller.clearComposing();
-      if (shouldUnfocus) {
+      if (shouldUnfocus) { //TODO: add validation
         switch (action) {
           case TextInputAction.none:
           case TextInputAction.unspecified:
           case TextInputAction.done:
+          if(widget.persistKeyboardOnTapOutside){
             break;
+          }
           case TextInputAction.go:
           case TextInputAction.search:
           case TextInputAction.send:
@@ -3248,6 +3265,45 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       _textInputConnection!.show();
     }
+  }
+
+  void _forceInputConnection(){
+        final TextEditingValue localValue = _value;
+        // When _needsAutofill == true && currentAutofillScope == null, autofill
+        // is allowed but saving the user input from the text field is
+        // discouraged.
+        //
+        // In case the autofillScope changes from a non-null value to null, or
+        // _needsAutofill changes to false from true, the platform needs to be
+        // notified to exclude this field from the autofill context. So we need to
+        // provide the autofillId.
+        _textInputConnection = _needsAutofill && currentAutofillScope != null
+            ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
+            : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+        _updateSizeAndTransform();
+        _schedulePeriodicPostFrameCallbacks();
+        _textInputConnection!
+          ..setStyle(
+            fontFamily: _style.fontFamily,
+            fontSize: _style.fontSize,
+            fontWeight: _style.fontWeight,
+            textDirection: _textDirection,
+            textAlign: widget.textAlign,
+          )
+          ..setEditingState(localValue)
+          ..show();
+        if (_needsAutofill) {
+          // Request autofill AFTER the size and the transform have been sent to
+          // the platform text input plugin.
+          _textInputConnection!.requestAutofill();
+        }
+        _lastKnownRemoteTextEditingValue = localValue;
+  }
+
+  void closeInputConnectionAndUnfocus(){
+    print('closeInputConnectionAndUnfocus');
+    _closeInputConnectionIfNeeded();
+    widget.focusNode.unfocus();
   }
 
   void _closeInputConnectionIfNeeded() {
@@ -4519,7 +4575,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// The `event` argument is the [PointerDownEvent] that caused the notification.
   void _defaultOnTapOutside(PointerDownEvent event) {
-    print("txt_fld_click_outside");
     /// The focus dropping behavior is only present on desktop platforms
     /// and mobile browsers.
     switch (defaultTargetPlatform) {
@@ -4531,20 +4586,29 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         switch (event.kind) {
           case ui.PointerDeviceKind.touch:
             if (kIsWeb) {
-              //widget.focusNode.unfocus();
+              if(widget.persistKeyboardOnTapOutside) {
+                _forceInputConnection();
+              } else {
+                widget.focusNode.unfocus();
+              }
             }
           case ui.PointerDeviceKind.mouse:
           case ui.PointerDeviceKind.stylus:
           case ui.PointerDeviceKind.invertedStylus:
           case ui.PointerDeviceKind.unknown:
-            //widget.focusNode.unfocus();
+          if(!widget.persistKeyboardOnTapOutside){
+            widget.focusNode.unfocus();
+          }
+
           case ui.PointerDeviceKind.trackpad:
             throw UnimplementedError('Unexpected pointer down event for trackpad');
         }
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        // widget.focusNode.unfocus();
+      if(!widget.persistKeyboardOnTapOutside){
+        widget.focusNode.unfocus();
+      }
     }
   }
 

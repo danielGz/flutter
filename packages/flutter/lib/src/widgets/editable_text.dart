@@ -4586,7 +4586,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         switch (event.kind) {
           case ui.PointerDeviceKind.touch:
             if (kIsWeb) {
-              if(widget.persistKeyboardOnTapOutside) {
+              if(widget.persistKeyboardOnTapOutside && widget.focusNode.hasFocus) {
                 _forceInputConnection();
               } else {
                 widget.focusNode.unfocus();
